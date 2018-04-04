@@ -13,6 +13,9 @@
  *       magma // color scheme array that maps 0 - 255 to rgb values
  *    
  */
+
+
+
 function Annotator() {
     this.wavesurfer;
     this.playBar;
@@ -123,7 +126,7 @@ Annotator.prototype = {
     },
 
     // Update the task specific data of the interfaces components
-    update: function() {
+    update: function(url) {
         var my = this;
         var mainUpdate = function(annotationSolutions) {
 
@@ -141,43 +144,13 @@ Annotator.prototype = {
                 alwaysShowTags
             );
 
-            // set video url
-            $('#tutorial-video').attr('src', tutorialVideoURL);
-
-            // add instructions
-            var instructionsContainer = $('#instructions-container');
-            instructionsContainer.empty();
-            if (typeof instructions !== "undefined"){
-                $('.modal-trigger').leanModal();
-                instructions.forEach(function (instruction, index) {
-                    if (index==0) {
-                        // first instruction is the header
-                        var instr = $('<h4>', {
-                            html: instruction
-                        });
-                    } else {
-                        var instr = $('<h6>', {
-                            "class": "instruction",
-                            html: instruction
-                        });                    
-                    }
-                    instructionsContainer.append(instr);
-                });
-                if (!my.instructionsViewed) {
-                    $('#instructions-modal').openModal();
-                    my.instructionsViewed = true;
-                }
-            }
-            else
-            {
-                $('#instructions-container').hide();
-                $('#trigger').hide();
-            }
 
             // Update the visualization type and the feedback type and load in the new audio clip
             my.wavesurfer.params.visualization = my.currentTask.visualization; // invisible, spectrogram, waveform
             my.wavesurfer.params.feedback = my.currentTask.feedback; // hiddenImage, silent, notify, none 
-            my.wavesurfer.load(my.currentTask.url);
+            if (url != undefined){
+                my.wavesurfer.load(url);
+            } 
         };
 
         if (this.currentTask.feedback !== 'none') {
@@ -199,11 +172,23 @@ Annotator.prototype = {
     // Update the interface with the next task's data
     loadNextTask: function() {
         var my = this;
-        $.getJSON(dataUrl)
+        var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() { 
+                    if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+                        var response = JSON.parse(xmlHttp.responseText);
+                        console.log(response.task);
+                        //alert(response.task[0]);
+                        my.currentTask = response.task;
+                        my.update();
+                    }
+                }
+        xmlHttp.open("GET", dataUrl, true); // true for asynchronous 
+        xmlHttp.send(null);
+/*         $.getJSON(dataUrl)
         .done(function(data) {
             my.currentTask = data.task;
             my.update();
-        });
+        }); */
     },
 
     // Collect data about users annotations and submit it to the backend
@@ -271,10 +256,35 @@ Annotator.prototype = {
 
 };
 
+
+
+var annotator;
 function main() {
     // Create all the components
-    var annotator = new Annotator();
+    annotator = new Annotator();
     // Load the first audio annotation task
     annotator.loadNextTask();
 }
 main();
+
+
+var currentURL;
+var loadSound = function(id){
+
+    wavesurferShow.empty();
+    annotator.wavesurfer.empty();
+    wavesurferShow.clearRegions();
+    currentURL = "/static/wav/dataset1/" + id + ".wav";
+    wavesurferShow.load("/static/wav/dataset1/" + id + ".wav");
+
+}
+var waveform = document.getElementById("waveform")
+
+waveform.addEventListener('mousedown', function(e) {
+    wavesurferShow.clearRegions();
+});
+waveform.addEventListener('mouseup', function(e) {
+    annotator.update(currentURL);
+
+});
+

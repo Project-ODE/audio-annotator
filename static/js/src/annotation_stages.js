@@ -214,13 +214,15 @@ StageThreeView.prototype = {
         $('.custom_tag input', this.dom).val('');
         $('.annotation_tag', this.dom).removeClass('disabled');
         $('.proximity_tag', this.dom).removeClass('disabled');
+        
 
         if (region.annotation) {
             var selectedTags = $('.annotation_tag', this.dom).filter(function () {
                 return this.innerHTML === region.annotation;
             });
             if (selectedTags.length > 0) {
-                selectedTags.addClass('selected');       
+                selectedTags.addClass('selected');    
+                
             } else {
                 $('.custom_tag input', this.dom).val(region.annotation); 
             }
