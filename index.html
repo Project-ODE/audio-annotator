@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Annotator</title>
+
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/audio-annotator.css">
+
+    <script type="text/javascript" src="/static/js/lib/jquery-2.2.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/materialize.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/wavesurfer.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/wavesurfer.spectrogram.min.js"></script>
+    <script type="text/javascript" src="/static/js/colormap/colormap.min.js"></script>
+
+    <script type="text/javascript" src="/static/js/src/message.js"></script>
+    <script type="text/javascript" src="/static/js/src/wavesurfer.regions.js"></script>
+    <script type="text/javascript" src="/static/js/src/wavesurfer.drawer.extended.js"></script>
+    <script type="text/javascript" src="/static/js/src/wavesurfer.labels.js"></script>
+    <script type="text/javascript" src="/static/js/src/hidden_image.js"></script>
+    <script type="text/javascript" src="/static/js/src/components.js"></script>
+    <script type="text/javascript" src="/static/js/src/annotation_stages.js"></script>
+    <script type="text/javascript" src="/static/js/src/main.js" defer></script>
+
+
+    <style type="text/css">
+        #waveform region{
+            border: 1px solid blue;
+        }
+    </style>
+
+
+</head>
+<body>
+<div style="width:20%;float:left;background: #8e8e8e;color:white;height:1200px;;">
+
+ <select id="datasetSelector" onchange="loadDataset(this.value)" style="display:block;color:black;">
+  <option value="-">-</option>
+  <option value="dataset1">dataset1</option>
+  <option value="dataset2">dataset2</option>
+</select> 
+
+
+</div>
+<div style="width:80%;float:left;">
+
+
+
+    <div class="row header">
+        <div id="dataset" style="height: 100px; margin-bottom: 100px;"></div>
+    </div>
+    <!-- Modal Structure -->
+    <div id="waveform" onclick="clear();"></div>
+    <div class="annotation">
+        <div class="labels"></div>
+        <div class="audio_visual"></div>
+        <div class="play_bar"></div>
+        <div class="hidden_img"></div>
+        <div class="creation_stage_container"></div>
+        <div class="submit_container"></div>
+    </div>
+    </div>
+    <script>
+        var dataUrl = '/static/json/sample_data.json';
+        var postUrl = 'http://127.0.0.1:8887/'; // This is where data posts to
+        var json;
+        var waves = [];
+        var loadDataset = function(value){
+
+
+            if (json != null) {
+                for (var i = 1; i <= json[0].n; i++) {
+                    $("#"+ i).remove();
+                }
+            }
+
+            if(value == "-") {return;}
+
+            $.ajax({
+                url: '/static/wav/' + value + '/info.json',
+                type: 'get',
+                dataType: 'json',
+                error: function(data){
+                    alert("error")
+                },
+                success: function(data){
+                         json = data;
+
+
+
+            for (var i = 1; i <= json[0].n; i++) {
+
+                var div = document.createElement("div");
+                var width = 100 / json[0].n;
+                div.style.width = width + "%";
+                div.style.float = "left";
+                div.setAttribute("onclick", "loadSound(this.id)")
+                div.setAttribute('id', i);
+                waves[i] = WaveSurfer.create({
+                        container: div,
+                        waveColor: 'grey',
+                        progressColor: 'blue',
+                        interact: false,
+                        cursorWidth: 0
+
+                    });
+                waves[i].load("/static/wav/" + value + "/" + i + ".wav");
+
+                document.getElementById("dataset").appendChild(div);
+            }  
+                    }
+            });
+
+
+
+        }
+    var wavesurferShow = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'grey',
+        interact: false
+    });
+    wavesurferShow.on('ready', function () {
+
+    wavesurferShow.enableDragSelection({});});
+
+
+
+    </script>
+</body>
+</html>
