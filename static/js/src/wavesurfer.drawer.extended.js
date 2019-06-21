@@ -165,7 +165,18 @@ WaveSurfer.util.extend(WaveSurfer.Drawer, {
         if (visualization === 'invisible') {
             //draw nothing
         } else if (visualization === 'spectrogram' && buffer) {
-            this.drawSpectrogram(buffer);
+            if (this.params.spectroUrl) {
+                var img = new Image();
+                img.onload = () => {
+                    this.waveCc.drawImage(img, 0, 0, img.width, img.height, 0, 0, this.width, this.height);
+                }
+                img.src = this.params.spectroUrl;
+            } else {
+                this.drawSpectrogram(buffer);
+            }
+            // ODE finished loading
+            $('#audio-annotator-loader').addClass('undisplayed');
+            $('#audio-annotator').removeClass('undisplayed');
         } else {
             this.params.barWidth ?
                 this.drawBars(peaks) :

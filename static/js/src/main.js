@@ -35,7 +35,7 @@ function Annotator() {
     });
 
     // Create wavesurfer (audio visualization component)
-    var height = 256;
+    var height = 512;
     this.wavesurfer = Object.create(WaveSurfer);
     this.wavesurfer.init({
         container: '.audio_visual',
@@ -177,6 +177,7 @@ Annotator.prototype = {
             // Update the visualization type and the feedback type and load in the new audio clip
             my.wavesurfer.params.visualization = my.currentTask.visualization; // invisible, spectrogram, waveform
             my.wavesurfer.params.feedback = my.currentTask.feedback; // hiddenImage, silent, notify, none 
+            my.wavesurfer.params.spectroUrl = my.currentTask.spectroUrl;
             my.wavesurfer.load(my.currentTask.url);
         };
 
